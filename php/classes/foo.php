@@ -220,7 +220,7 @@ class Author {
 		//enforce the hash is properly formatted
 		$newAuthorHash = trim($newAuthorHash);
 		if(empty($newProfileHash) === true) {
-			throw(new \RangeException("password hash empty or insecure"))
+			throw(new \RangeException("password hash empty or insecure"));
 		}
 		//enforce the hash is really an Argon hash
 		$authorHashInfo = password_get_info($newAuthorHash);
@@ -233,6 +233,47 @@ class Author {
 		}
 		//store this hash
 		$this->authorHash = $newAuthorHash;
+	}
+	/**
+	 * accessor for author username
+	 *
+	 * @returm string value of username
+	 */
+	public function getAuthorUsername(): string {
+		return $this->authorUsername;
+	}
+	/**
+	 * @param string $newAuthorUsername
+	 * @throws \InvalidArgumentException if $newAuthorUsername is not a string or insecure
+	 * @throws \RangeException if $newAuthorUsername is < 32 characters
+	 * @throws \TypeError if $newAithorUsername is not a string
+	 *
+	 */
+
+	public function setAuthorUsername(string $newAuthorUsername): void {
+		//verify the username is secure
+		$newAuthorUsername = trim($newAuthorUsername);
+		$newAuthorUsername = filter_var($newAuthorUsername, FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
+		if(empty($newAuthorUsername) === true) {
+			throw(new \InvalidArgumentException("author username is empty or insecure"));
+		}
+		//verify the username will fit in the database
+		if(strlen($newAuthorUsername) > 32) {
+			throw(new\RangeException("author username is too large"));
+		}
+		$this->authorUsername = $newAuthorUsername;
+	}
+
+	/**
+	 * formats the state variables for JSON serialization
+	 *
+	 * @return array resulting state variables to serialize
+	 **/
+	public function jsonSerialize() : array {
+		$fields = get_object_vars($this);
+
+		$fields["authorId"] = $this->authorId->toString();
+
 	}
 }
 ?>
