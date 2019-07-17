@@ -139,8 +139,39 @@ class Author {
 
 	/**
 	 * accessor method for activation token
+	 *
+	 * @return string value of activation token
 	 */
+	public function getAuthorActivationToken(): string {
+		return $this->authorActivationToken;
+	}
 
+	/**
+	 * mutator method for account activation token
+	 *
+	 *@param string $newAuthorActivationToken
+	 *@throw \InvalidArgumentException if the token is not a string or insecure
+	 *@throw \RangeException if th activation token is not exactly 32 characters
+	 *@throws \TypeError if the activation token is not a string
+	 */
+	/**
+	 * @param string $authorActivationToken
+	 */
+	public function setAuthorActivationToken(string $newAuthorActivationToken): void {
+		if($newAuthorActivationToken === null){
+			$this->profileAcdivationToken = null;
+			return;
+		}
+		$newAuthorActivationToken = strtolower(trim($newAuthorActivationToken));
+		if(ctype_xdigit($newAuthorActivationToken) === false){
+			throw(new\RangeException("user activation is not valid"));
+		}
+		//make sure activation token is only 32 characters
+		if(strlen($newAuthorActivationToken) === false){
+			throw(new\RangeException("user activation token has to be 32 characters"));
+		}
+		$this->authorActivationToken = $newAuthorActivationToken;
+	}
 	/**
 	 * accessor method for email address
 	 *
