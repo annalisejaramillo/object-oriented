@@ -199,6 +199,40 @@ class Author {
 		// store the email
 		$this->authorEmail = $newAuthorEmail;
 	}
+	/**
+	 * accessor method for author hash
+	 *
+	 * @return string value of hash
+	 */
+	public function getAuthorHash(): string {
+		return $this->authorHash;
+	}
 
+	/**
+	 * mutator method for profile hash password
+	 *
+	 * @param string $newAuthorHash
+	 * @throws \InvalidArgumentException if the hash is not secure
+	 * @throws \RangeException if the hash is not 128 characters
+	 * @throws \TypeError if author hash is not a string
+	 */
+	public function setAuthorHash(string $newAuthorHash): void {
+		//enforce the hash is properly formatted
+		$newAuthorHash = trim($newAuthorHash);
+		if(empty($newProfileHash) === true) {
+			throw(new \RangeException("password hash empty or insecure"))
+		}
+		//enforce the hash is really an Argon hash
+		$authorHashInfo = password_get_info($newAuthorHash);
+		if($authorHashInfo["algoNsme"]!== "argon2i") {
+			throw(new \InvalidArgumentException("hash is not a valid hash"));
+		}
+		//enforce that this hash is exactly 97 characters
+		if(strlen($newAuthorHash) !== 97){
+			throw(new \RangeException("hash must be 97 characters"));
+		}
+		//store this hash
+		$this->authorHash = $newAuthorHash;
+	}
 }
 ?>
