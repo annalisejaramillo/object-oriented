@@ -1,6 +1,8 @@
 <?php
 namespace Ajaramillo208\ObjectOriented;
 
+use http\Exception\BadQueryStringException;
+
 require_once("autoload.php");
 
 
@@ -8,7 +10,8 @@ require_once("autoload.php");
  *
  *this is a an author profile
  *
- * this author profile is data that is stored about a user for a book site
+ * this author profile is data that is stored about a user for a book site. this can be easily extended to
+ * emulate more features of this book site
  *
  */
 
@@ -26,7 +29,7 @@ class Author {
 	 */
 	private $authorAvatarUrl;
 	/**
-	 * activation token for this author
+	 * activation token handed out to verify that the auhtor profile is valid and not malicious
 	 * @var string $authorActivationToken
 	 */
 	private $authorActivationToken;
@@ -49,8 +52,8 @@ class Author {
 	/**
 	 * constructor for this author profile
 	 * @param string|uuid $newAuthorId id of this author or null if a new author
-	 * @param string $newAuthorAvatarUrl string containing URL
-	 * @param string $newAuthorActivationToken string containing activation token for this author
+	 * @param string|null $newAuthorAvatarUrl string containing URL or null if no author avatar URL
+	 * @param string|null $newAuthorActivationToken string activation token to safe guard against malicious accounts
 	 * @param string $newAuthorEmail new value of email
 	 * @param string $newAuthorHash string containing hash for this author
 	 * @param string $newAuthorUsername string new value of username
@@ -62,10 +65,75 @@ class Author {
 
 	public function __construct($newAuthorId, $newAuthorAvatarUrl, $newAuthorActivationToken, $newAuthorEmail, $newAuthorHash, $newAuthorUsername) {
 		try {
-			$this->setAuthorId($newAuthorId);
-
-
+			$this->setNewAuthorId($newAuthorId);
+			$this->setNewAuthorAvatarUrl($newAuthorAvatarUrl);
+			$this->setNewAuthorActivationToken($newAuthorActivationToken);
+			$this->setNewAuthorEmail($newAuthorEmail);
+			$this->setNewAuthorHash($newAuthorHash);
+			$this->setNewAuthorUsername($newAuthorUsername);
 		}
+		// determine what exception typw was thrown
+		catch(\InvalidArgumentException | \RangeException | \Exception | \TypeError $exception) {
+			$exceptionType = get_class($exception);
+			throw(new $exceptionType($exception->getMessage(), 0, $exception));
 		}
+	}
+
+	/**
+	 * accessor method for author id
+	 *
+	 * @return Uuid value of author id
+	 */
+	public function getAuthorId(): Uuid {
+		return $this->authorId;
+	}
+
+	/**
+	 * mutator method for author id
+	 *
+	 * @param Uuid|string $newAuthorId new value of author id
+	 * @throws \RangeException if $newAuthorId is not positive
+	 * @throws \TypeError if $newAuthorId is not Uuid or string
+	 */
+	public function setAuthorId($newAuthorId) : void {
+		try {
+			$Uuid = self::validateUuid($newAuthorId);
+		}
+		catch(\InvalidArgumentException | \RangeException | \Exception | \TypeError $exception) {
+			$exceptionType = get_class($exception);
+			throw(new $exceptionType($exception->getMessage(), 0, $exception));
+		}
+		 // convert and store tweet id
+		$this->authorId = $Uuid;
+	}
+
+	/**
+	 * accessor method for author avatar URL
+	 *
+	 * @return string
+	 */
+	public function getAuthorAvatarUrl () {
+		return($this->authorAvatarUrl);
+	}
+
+	/**
+	 * mutator method for author avatar URL or null if no author avatar URL
+	 *
+	 * @param string $newAuthorAvatarURL new value of author avatar URL
+	 * @throws \InvalidArgumentException if $newAuthorAvatarUrl is not a string or insecure
+	 * @throws \RangeException if $newAuthorAvatarUrl is > 255
+	 * @throws \TypeError if $new $newAuthorAvatarUrl is not a string
+	 */
+	public function setAuthorAvatarUrl(string $authorAvatarUrl) : void {
+		$newAuthorAvatarUrl = trim($newAuthorAvatarUrl);
+		$newAuthorAvatarUrl = filter_var($newAuthorAvatarUrl, FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
+
+		//verify the avatar URL will fit in the database
+		if(strlen($newAuthorAvatarUrl) > 255) {
+			throw(new \RangeException("image cloudinary content to large"));
+		}
+		//store the image cloudinary content
+		$this->authorAvatarUrl = $newAuthorAvatarUrl;
+	}
 }
 ?>
