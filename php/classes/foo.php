@@ -52,10 +52,10 @@ class Author {
 	/**
 	 * constructor for this author profile
 	 * @param string|uuid $newAuthorId id of this author or null if a new author
-	 * @param string|null $newAuthorAvatarUrl string containing URL or null if no author avatar URL
-	 * @param string|null $newAuthorActivationToken string activation token to safe guard against malicious accounts
+	 * @param ?string|null $newAuthorAvatarUrl string containing URL or null if no author avatar URL
+	 * @param ?string|null $newAuthorActivationToken string activation token to safe guard against malicious accounts
 	 * @param string $newAuthorEmail new value of email
-	 * @param string $newAuthorHash string containing hash for this author
+	 * @param string $newAuthorHash string containing password hash
 	 * @param string $newAuthorUsername string new value of username
 	 * @throws \InvalidArgumentException if data types are not valid
 	 * @throws \RangeException if data values are out of bounds (e.g., strings too long, negative integers)
@@ -65,12 +65,12 @@ class Author {
 
 	public function __construct($newAuthorId, $newAuthorAvatarUrl, $newAuthorActivationToken, $newAuthorEmail, $newAuthorHash, $newAuthorUsername) {
 		try {
-			$this->setNewAuthorId($newAuthorId);
-			$this->setNewAuthorAvatarUrl($newAuthorAvatarUrl);
-			$this->setNewAuthorActivationToken($newAuthorActivationToken);
-			$this->setNewAuthorEmail($newAuthorEmail);
-			$this->setNewAuthorHash($newAuthorHash);
-			$this->setNewAuthorUsername($newAuthorUsername);
+			$this->setAuthorId($newAuthorId);
+			$this->setAuthorAvatarUrl($newAuthorAvatarUrl);
+			$this->setAuthorActivationToken($newAuthorActivationToken);
+			$this->setAuthorEmail($newAuthorEmail);
+			$this->setAuthorHash($newAuthorHash);
+			$this->setAuthorUsername($newAuthorUsername);
 		}
 		// determine what exception typw was thrown
 		catch(\InvalidArgumentException | \RangeException | \Exception | \TypeError $exception) {
@@ -95,7 +95,7 @@ class Author {
 	 * @throws \RangeException if $newAuthorId is not positive
 	 * @throws \TypeError if $newAuthorId is not Uuid or string
 	 */
-	public function setAuthorId($newAuthorId) : void {
+	public function setAuthorId(string $newAuthorId) : void {
 		try {
 			$Uuid = self::validateUuid($newAuthorId);
 		}
@@ -103,7 +103,7 @@ class Author {
 			$exceptionType = get_class($exception);
 			throw(new $exceptionType($exception->getMessage(), 0, $exception));
 		}
-		 // convert and store tweet id
+		 // convert and store author id
 		$this->authorId = $Uuid;
 	}
 
@@ -121,10 +121,11 @@ class Author {
 	 *
 	 * @param string $newAuthorAvatarURL new value of author avatar URL
 	 * @throws \InvalidArgumentException if $newAuthorAvatarUrl is not a string or insecure
-	 * @throws \RangeException if $newAuthorAvatarUrl is > 255
+	 * @throws \RangeException if $newAuthorAvatarUrl is > 255 characters
 	 * @throws \TypeError if $new $newAuthorAvatarUrl is not a string
 	 */
-	public function setAuthorAvatarUrl(string $authorAvatarUrl) : void {
+	public function setAuthorAvatarUrl(?string $newAuthorAvatarUrl) : void {
+
 		$newAuthorAvatarUrl = trim($newAuthorAvatarUrl);
 		$newAuthorAvatarUrl = filter_var($newAuthorAvatarUrl, FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
 
@@ -135,5 +136,38 @@ class Author {
 		//store the image cloudinary content
 		$this->authorAvatarUrl = $newAuthorAvatarUrl;
 	}
+
+	/**
+	 * accessor method for activation token
+	 */
+
+	/**
+	 * accessor method for email address
+	 *
+	 * @return string value of email
+	 */
+	public function getAuthorEmail(): string {
+		return $this->authorEmail;
+	}
+
+	/**
+	 * mutator method for email
+	 *
+	 * @param string $newAuthorEmail new value of email address
+	 * @throws \InvalidArgumentException if $newAuthorEmail is not a valid email or insecure
+	 * @throws \RangeException if newAuthorEmail is > 128 characters
+	 */
+	public function setAuthorEmail(string $newAuthorEmail) {
+
+		//verify the email is secure
+		$newAuthorEmail = trim($newAuthorEmail);
+		$newAuthorEmail = filter_var($newAuthorEmail, FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
+		if(empty($newAuthorEmail)===true) {
+			throw(new \InvalidArgumentException("not a valid email address"));
+		}
+		// store the email
+		$this->authorEmail = $newAuthorEmail;
+	}
+
 }
 ?>
