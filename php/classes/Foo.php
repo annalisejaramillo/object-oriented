@@ -1,10 +1,10 @@
 <?php
 namespace Ajaramillo208\ObjectOriented;
 
-use http\Exception\BadQueryStringException;
-
 require_once("autoload.php");
+require_once(dirname(__DIR__) . "/vendor/autoload.php");
 
+use Ramsey\Uuid\Uuid;
 
 /**
  *
@@ -15,9 +15,8 @@ require_once("autoload.php");
  *
  */
 
-
-
-class Author {
+class Author implements \JsonSerializable {
+	use ValidateUuid;
 	/**
 	 * id for this author; this is the primary key
 	 * @var Uuid $authorId
@@ -29,7 +28,7 @@ class Author {
 	 */
 	private $authorAvatarUrl;
 	/**
-	 * activation token handed out to verify that the auhtor profile is valid and not malicious
+	 * activation token handed out to verify that the author profile is valid and not malicious
 	 * @var string $authorActivationToken
 	 */
 	private $authorActivationToken;
@@ -57,10 +56,10 @@ class Author {
 	 * @param string $newAuthorEmail new value of email
 	 * @param string $newAuthorHash string containing password hash
 	 * @param string $newAuthorUsername string new value of username
-	 * @throws \InvalidArgumentException if data types are not valid
-	 * @throws \RangeException if data values are out of bounds (e.g., strings too long, negative integers)
-	 * @throws \TypeError if data types violate type hints
-	 * @throws \Exception if some other exception occurs
+	 * @throws\InvalidArgumentException if data types are not valid
+	 * @throws\RangeException if data values are out of bounds (e.g., strings too long, negative integers)
+	 * @throws\TypeError if data types violate type hints
+	 * @throws\Exception if some other exception occurs
 	 **/
 
 	public function __construct($newAuthorId, $newAuthorAvatarUrl, $newAuthorActivationToken, $newAuthorEmail, $newAuthorHash, $newAuthorUsername) {
@@ -72,7 +71,7 @@ class Author {
 			$this->setAuthorHash($newAuthorHash);
 			$this->setAuthorUsername($newAuthorUsername);
 		}
-		// determine what exception typw was thrown
+		// determine what exception type was thrown
 		catch(\InvalidArgumentException | \RangeException | \Exception | \TypeError $exception) {
 			$exceptionType = get_class($exception);
 			throw(new $exceptionType($exception->getMessage(), 0, $exception));
@@ -119,7 +118,7 @@ class Author {
 	/**
 	 * mutator method for author avatar URL or null if no author avatar URL
 	 *
-	 * @param string $newAuthorAvatarURL new value of author avatar URL
+	 * @param string $newAuthorAvatarUrl new value of author avatar URL
 	 * @throws \InvalidArgumentException if $newAuthorAvatarUrl is not a string or insecure
 	 * @throws \RangeException if $newAuthorAvatarUrl is > 255 characters
 	 * @throws \TypeError if $new $newAuthorAvatarUrl is not a string
@@ -154,12 +153,9 @@ class Author {
 	 *@throw \RangeException if th activation token is not exactly 32 characters
 	 *@throws \TypeError if the activation token is not a string
 	 */
-	/**
-	 * @param string $authorActivationToken
-	 */
 	public function setAuthorActivationToken(string $newAuthorActivationToken): void {
 		if($newAuthorActivationToken === null){
-			$this->profileAcdivationToken = null;
+			$this->authorActivationToken = null;
 			return;
 		}
 		$newAuthorActivationToken = strtolower(trim($newAuthorActivationToken));
@@ -219,12 +215,12 @@ class Author {
 	public function setAuthorHash(string $newAuthorHash): void {
 		//enforce the hash is properly formatted
 		$newAuthorHash = trim($newAuthorHash);
-		if(empty($newProfileHash) === true) {
+		if(empty($newAuthorHash) === true) {
 			throw(new \RangeException("password hash empty or insecure"));
 		}
 		//enforce the hash is really an Argon hash
 		$authorHashInfo = password_get_info($newAuthorHash);
-		if($authorHashInfo["algoNsme"]!== "argon2i") {
+		if($authorHashInfo["algoName"]!== "argon2i") {
 			throw(new \InvalidArgumentException("hash is not a valid hash"));
 		}
 		//enforce that this hash is exactly 97 characters
@@ -246,10 +242,9 @@ class Author {
 	 * @param string $newAuthorUsername
 	 * @throws \InvalidArgumentException if $newAuthorUsername is not a string or insecure
 	 * @throws \RangeException if $newAuthorUsername is < 32 characters
-	 * @throws \TypeError if $newAithorUsername is not a string
+	 * @throws \TypeError if $newAuthorUsername is not a string
 	 *
 	 */
-
 	public function setAuthorUsername(string $newAuthorUsername): void {
 		//verify the username is secure
 		$newAuthorUsername = trim($newAuthorUsername);
@@ -274,6 +269,7 @@ class Author {
 
 		$fields["authorId"] = $this->authorId->toString();
 
+		return($fields);
 	}
 }
 ?>
