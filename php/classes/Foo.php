@@ -496,7 +496,15 @@ class Author implements \JsonSerializable {
 	 * @throws \TypeError when a variable are not the correct data type
 	 *
 	 **/
+	public static function getAuthorByHash(\PDO $pdo, string $authorHash) : \splFixedArray {
+		// sanitize the description before searching
+		$authorHash = trim($authorHash);
+		$authorHash = filter_var($authorHash, FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
+		if(empty($authorHash) === true) {
+			throw(new \PDOException("Url invalid"));
+		}
 
+	}
 
 	/**
 	 * formats the state variables for JSON serialization
