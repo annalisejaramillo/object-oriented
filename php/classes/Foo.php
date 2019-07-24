@@ -412,6 +412,34 @@ class Author implements \JsonSerializable {
 		if(empty($authorActivationToken) === true) {
 			throw(new \PDOException("Url invalid"));
 		}
+		//escape any mySQL wild cards
+		$authorActivationToken = str_replace("_", "\\_", str_replace("%", "\\%", $authorActivationToken));
+
+		//create query template
+		$query = "SELECT authorId, authorAvatarUrl, authorActivationToken, authorEmail, 
+                authorHash, authorUsername FROM author WHERE authorActivationToken LIKE :authorActivationToken";
+		$statement = $pdo->prepare($query);
+
+		// bind the author content to the place holder in the template
+		$authorActivationToken = "%$authorActivationToken";
+		$parameters = ["authorActivationToken" => $authorActivationToken];
+		$statement->execute($parameters);
+
+		//build am array of authors
+		$authors = new \SplFixedArray($statement->rowCount());
+		$statement->setFetchMode(\PDO::FETCH_ASSOC);
+		while(($row = $statement->fetch()) !== false) {
+			try {
+				$author = new Author ($row["authorId"], $row["authorAvatarUrl"], $row["authorActivationToken"], $row["authorEmail"], $row["authorHash"], $row["authorUsername"]);
+				$author[$author->key()] = $author;
+				$author->next();
+			} catch(\Exception $exception) {
+				// if the row couldnt be converted, rethrow it
+				throw(new \PDOException($exception->getMessage(), 0, $exception ));
+			}
+		}
+		return($authors);
+	}
 
 
 	/**
