@@ -530,6 +530,15 @@ class Author implements \JsonSerializable {
 		}
 		return($authors);
 	}
+	/**
+	 * gets the Author by username
+	 *
+	 * @param \PDO $pdo PDO connection object
+	 * @param Uuid|string $authorUsername author username to search for
+	 * @return \SplFixedArray SplFixedArray of authors found
+	 * @throws \PDOException when mySQL related errors occur
+	 * @throws \TypeError when a variable are not the correct data type
+
 
 	/**
 	 * formats the state variables for JSON serialization
