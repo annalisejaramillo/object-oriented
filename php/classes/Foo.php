@@ -151,7 +151,7 @@ class Author implements \JsonSerializable {
 	 *@param string $newAuthorActivationToken
 	 *@throw \InvalidArgumentException if the token is not a string or insecure
 	 *@throw \RangeException if th activation token is not exactly 32 characters
-	 *@throws \TypeError if the activation token is not a string
+	 *@throw \TypeError if the activation token is not a string
 	 */
 	public function setAuthorActivationToken(string $newAuthorActivationToken): void {
 		if($newAuthorActivationToken === null){
@@ -269,11 +269,14 @@ class Author implements \JsonSerializable {
 	public function insert(\PDO $pdo) : void {
 
 		//create query template
-		$query = "INSERT INTO author(authorId, authorAvatarUrl, authorActivationToken, authorEmail, authorHash, authorUsername) VALUES(:authorId, :authorAvatarUrl, :authorActivationToken, :authorEmail, :authorHash, :authorUsername)";
+		$query = "INSERT INTO author(authorId, authorAvatarUrl, authorActivationToken, authorEmail, authorHash, authorUsername) 
+						VALUES(:authorId, :authorAvatarUrl, :authorActivationToken, :authorEmail, :authorHash, :authorUsername)";
 		$statement = $pdo->prepare($query);
 
 		//bind the member variables to the place holders in the template
-		$parameters = ["authorId" => $this->authorId->getBytes(), "authorAvatarUrl" => $this->authorAvatarUrl, "authorActivationToken" => $this->authorActivationToken, "authorEmail" => $this->authorEmail, "authorHash" => $this->authorHash, "authorUsername" => $this->authorUsername];
+		$parameters = ["authorId" => $this->authorId->getBytes(), "authorAvatarUrl" => $this->authorAvatarUrl,
+			"authorActivationToken" => $this->authorActivationToken, "authorEmail" => $this->authorEmail, "authorHash" => $this->authorHash,
+			"authorUsername" => $this->authorUsername];
 		$statement->execute($parameters);
 
 	}
@@ -289,11 +292,11 @@ class Author implements \JsonSerializable {
 
 		//create query template
 		$query = "DELETE FROM author WHERE authorId = :authorId";
-		$statment = $pdo->prepare($query);
+		$statement = $pdo->prepare($query);
 
 		//bind the member variables to the place holder in the template
 		$parameters = ["authorId" => $this->authorId->getBytes()];
-		$statment->execute($parameters);
+		$statement->execute($parameters);
 	}
 
 	public function update(\PDO $pdo) : void {
@@ -306,6 +309,16 @@ class Author implements \JsonSerializable {
 		$statement->execute($parameters);
 	}
 
+	/**
+	 * gets the Author by authorId
+	 *
+	 * @param \PDO $pdo PDO connection object
+	 * @param Uuid|string $authorId author id to search for
+	 * @return Author|null Author found or null if not found
+	 * @throws \PDOException when mySQL related errors occur
+	 * @throws \TypeError when a variable are not the correct data type
+	 *
+	 **/
 
 
 	/**
