@@ -405,6 +405,13 @@ class Author implements \JsonSerializable {
 	 * @throws \PDOException when mySQL related errors occur
 	 * @throws \TypeError when variables are not the correct data type
 	 **/
+	public static function getAuthorByActivationToken(\PDO $pdo, string $authorActivationToken) : \splFixedArray {
+		// sanitize the description before searching
+		$authorActivationToken = trim($authorActivationToken);
+		$authorActivationToken = filter_var($authorActivationToken, FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
+		if(empty($authorActivationToken) === true) {
+			throw(new \PDOException("Url invalid"));
+		}
 
 
 	/**
