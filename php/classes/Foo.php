@@ -503,6 +503,12 @@ class Author implements \JsonSerializable {
 		if(empty($authorHash) === true) {
 			throw(new \PDOException("Url invalid"));
 		}
+		//escape any mySQL wild cards
+		$authorHash = str_replace("_", "\\_", str_replace("%", "\\%", $authorHash));
+
+		//create query template
+		$query = "SELECT authorId, authorAvatarUrl, authorActivationToken, authorEmail, authorHash, authorUsername FROM author WHERE authorHash LIKE :authorHash";
+		$statement = $pdo->prepare($query);
 
 	}
 
