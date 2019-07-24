@@ -510,6 +510,25 @@ class Author implements \JsonSerializable {
 		$query = "SELECT authorId, authorAvatarUrl, authorActivationToken, authorEmail, authorHash, authorUsername FROM author WHERE authorHash LIKE :authorHash";
 		$statement = $pdo->prepare($query);
 
+		// bind the author content to the place holder in the template
+		$authorHash = "%$authorHash%";
+		$parameters = ["authorHash" => $authorHash];
+		$statement->execute($parameters);
+
+		//build am array of authors
+		$authors = new \SplFixedArray($statement->rowCount());
+		$statement->setFetchMode(\PDO::FETCH_ASSOC);
+		while(($row = $statement->fetch()) !== false) {
+			try {
+				$author = new Author ($row["authorId"], $row["authorAvatarUrl"], $row["authorActivationToken"], $row["authorEmail"], $row["authorHash"], $row["authorUsername"]);
+				$author[$author->key()] = $author;
+				$author->next();
+			} catch(\Exception $exception) {
+				// if the row couldnt be converted, rethrow it
+				throw(new \PDOException($exception->getMessage(), 0, $exception ));
+			}
+		}
+		return($authors);
 	}
 
 	/**
